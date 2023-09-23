@@ -117,8 +117,8 @@ uint32_t test = 0;
 uint32_t radix = 100ULL, old_radix = 100ULL;                   //start step size
 boolean changed_f = 0, stepflag = 0, calflag = 0, modeflag = 0, ritset = 0, callFreq=0,shiftFlag = 0;
 boolean calibrate = 0;
-boolean lsb_flag = 0, usb_flag = 0;
-boolean shiftMode= 0;  
+static boolean lsb_flag = 0, usb_flag = 0, cw_flag = 1;
+static uint8_t shiftMode= 0;  
 boolean calibrate_flag = 0;
 
 int  act_clk = 0, disp_txt = 0;
@@ -378,26 +378,25 @@ void smeter() {
  * usb lsb
  */
  boolean changeMode() {
-
    if(!digitalRead(LSB_SWITCH)) {
-    if(lsb_flag==0) {
-       lsb_flag=1;
-       usb_flag=0;
-       shiftMode=0;
-    }
+     shiftMode++;     
+     if (shiftMode > 2) shiftMode = 0;
    }
 
-
-
-   if(!digitalRead(USB_SWITCH)) {
-    if(usb_flag==0) {
-       usb_flag=1;
-       lsb_flag=0;
-       shiftMode=1;
-    }
+   if (shiftMode == 0) {
+     lsb_flag = 1;
+     usb_flag = 0;
+     cw_flag = 0;
+   } else if (shiftMode == 1) {
+     lsb_flag = 0;
+     usb_flag = 1;
+     cw_flag = 0;
+   } else if (shiftMode == 2) {
+     lsb_flag = 0;
+     usb_flag = 0;
+     cw_flag = 1;
    }
 
-   
   return 1;
  }
 
@@ -543,9 +542,11 @@ void display_frequency()
   unsigned long freq;
  lcd.setCursor(0, 0);
 
- if(shiftMode == 1) {
+ if(shiftMode == 2) {
+    lcd.print("C");
+  } else if(shiftMode == 1) {
     lcd.print("U");
-  } else {
+  } else if(shiftMode == 0){
     lcd.print("L");
   }
   switch(act_clk)
@@ -699,10 +700,12 @@ void setLoFrequency() {
           } else if(shiftMode ==1) {
              vfo_lo = vfo_hf + vfo_if+if_shift;             //usb
               if_freq_out = vfo_if+if_shift;
+          } else if(shiftMode == 2) {
+             vfo_lo = vfo_hf + vfo_if+if_shift-700ULL;             //cw
+              if_freq_out = vfo_if+if_shift-700ULL;
           } else {  
              vfo_lo = vfo_hf + vfo_if;
-       
-      }              
+          }              
   #endif
   #if defined(lower) 
           vfo_lo = vfo_hf - vfo_if;    
