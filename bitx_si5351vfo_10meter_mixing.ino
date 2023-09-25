@@ -342,7 +342,7 @@ void smeter() {
          analogReference(INTERNAL);
          // read the value and map it for 13 chars (0-12) in the LCD bar
         
-          val = analogRead(A1);
+          val = analogRead(A1) * 1.4;
          
          // reset the reference for the buttons handling
          analogReference(DEFAULT);
@@ -701,8 +701,8 @@ void setLoFrequency() {
              vfo_lo = vfo_hf + vfo_if+if_shift;             //usb
               if_freq_out = vfo_if+if_shift;
           } else if(shiftMode == 2) {
-             vfo_lo = vfo_hf + vfo_if+if_shift-700ULL;             //cw
-              if_freq_out = vfo_if+if_shift-700ULL;
+             vfo_lo = vfo_hf + vfo_if+800ULL;             //cw
+              if_freq_out = vfo_if+800ULL;
           } else {  
              vfo_lo = vfo_hf + vfo_if;
           }              
@@ -875,7 +875,7 @@ void loop()
   }
 
 
-Serial.println(act_clk);
+// Serial.println(act_clk);
   /**
    * change mode usb or lsb
    */
